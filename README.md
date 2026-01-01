@@ -43,4 +43,3 @@ El objetivo principal es demostrar cómo mejorar la experiencia de usuario (UX) 
 ├── 📄 hotel.html        # Página principal (Landing Page del Hotel + Chatbot)
 ├── 📄 proyecto.html     # Documentación técnica y desglose de Intents/JSON
 ├── 📄 README.md         # Este archivo
-└── 📁 assets            # (Opcional) Imágenes o recursos locales
