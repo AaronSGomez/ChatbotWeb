@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica | Chatbot Hotel</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%231a1a1a%22 rx=%2220%22/><text y=%22.9em%22 x=%2250%22 text-anchor=%22middle%22 font-family=%22serif%22 font-weight=%22bold%22 font-size=%2260%22 fill=%22white%22>CA</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #1a1a1a;
+            --color-bg: #f4f4f4;
+            --font-titles: 'Playfair Display', serif;
+            --font-body: 'Poppins', sans-serif;
+            --font-code: 'Fira Code', monospace;
+        }
+
+        body {
+            font-family: var(--font-body);
+            margin: 0;
+            padding: 0;
+            background-color: var(--color-bg);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--color-primary);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+        header h1 { margin: 0; font-family: var(--font-titles); font-size: 2.5rem; }
+        header p { opacity: 0.8; margin-top: 10px; font-weight: 300; letter-spacing: 1px;}
+        
+        .btn-back {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 20px;
+            border: 1px solid white;
+            color: white;
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+        .btn-back:hover { background: white; color: var(--color-primary); }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .intro-box {
+            background: white;
+            padding: 30px;
+            border-left: 5px solid var(--color-primary);
+            margin-bottom: 40px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        /* ESTILOS DE LAS TARJETAS DE INTENTS */
+        .intent-card {
+            background: white;
+            border: 1px solid #ddd;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .intent-header {
+            background: #e0e0e0;
+            padding: 15px 25px;
+            border-bottom: 1px solid #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .intent-name {
+            font-family: var(--font-code);
+            font-weight: bold;
+            color: var(--color-primary);
+            font-size: 1.1rem;
+        }
+        .tag {
+            background: var(--color-primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+
+        .intent-body {
+            padding: 25px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .intent-body { grid-template-columns: 1fr; }
+        }
+
+        h4 { margin-top: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+
+        /* Lista de frases */
+        ul.phrases {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.9rem;
+            color: #444;
+        }
+        ul.phrases li {
+            padding: 5px 0;
+            border-bottom: 1px dotted #eee;
+        }
+        ul.phrases li::before { content: "💬 "; }
+
+        /* Bloque de código JSON */
+        .json-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            overflow-x: auto;
+            max-height: 300px; /* Scroll si es muy largo */
+            overflow-y: auto;
+        }
+
+        /* Sintaxis simple para JSON */
+        .key { color: #e06c75; }
+        .string { color: #98c379; }
+        .number { color: #d19a66; }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Documentación Técnica</h1>
+        <p>Arquitectura conversacional del Chatbot "Costa Azul"</p>
+        <a href="index.html" class="btn-back">← Volver a la Web del Hotel</a>
+    </header>
+
+    <div class="container">
+
+        <div class="intro-box">
+            <h3 style="margin-top:0">Sobre este proyecto</h3>
+            <p>Esta página detalla la estructura lógica creada en <strong>Google Dialogflow</strong> para el asistente virtual del Hotel. El sistema utiliza procesamiento de lenguaje natural (NLP) para detectar intenciones y responde mediante <strong>Rich Content (JSON Payload)</strong> para generar elementos visuales interactivos.</p>
+        </div>
+
+        <div class="intent-card">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: FAQ_PARKING</span>
+                <span class="tag">Información</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Frases de Entrenamiento (Input)</h4>
+                    <ul class="phrases">
+                        <li>¿Necesito reservar plaza con antelación?</li>
+                        <li>¿Cuál es el horario de acceso al parking?</li>
+                        <li>¿Hay plazas adaptadas?</li>
+                        <li>¿Qué ocurre si el parking está completo?</li>
+                        <li>¿Tienen cargadores eléctricos?</li>
+                        <li>¿Es gratis el parking?</li>
+                        <li>¿Cuánto cuesta aparcar?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Visual (JSON Payload)</h4>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "type": "description",
+        "title": "🚗 Parking Privado Vigilado",
+        "text": [
+          "Disponemos de aparcamiento propio.",
+          "💶 Tarifa general: 15€/día."
+        ]
+      },
+      {
+        "type": "description",
+        "title": "🎁 ¿Cómo conseguirlo GRATIS?",
+        "text": [
+          "¡Invitamos si te alojas en Suite!",
+          "Gratis para estancias > 3 días."
+        ]
+      },
+      {
+        "type": "description",
+        "title": "⚡ Servicios",
+        "text": [
+          "🔌 Cargadores eléctricos.",
+          "🛡️ Seguridad 24 horas."
+        ]
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: FAQ_WIFI</span>
+                <span class="tag">Servicios</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Frases de Entrenamiento</h4>
+                    <ul class="phrases">
+                        <li>¿Es una red privada o abierta?</li>
+                        <li>¿Hay Wi-Fi de alta velocidad?</li>
+                        <li>¿Tenéis Wi-Fi en las habitaciones?</li>
+                        <li>¿Es gratis la Wi-Fi?</li>
+                        <li>¿La conexión es segura?</li>
+                        <li>Clave del wifi</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Visual</h4>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "type": "description",
+        "title": "📶 Wi-Fi Alta Velocidad (Gratis)",
+        "text": [
+          "✅ Habitaciones y zonas comunes.",
+          "🚀 Ideal Streaming y Videollamadas."
+        ]
+      },
+      {
+        "type": "description",
+        "title": "🔒 Ciberseguridad",
+        "text": [
+          "Red privada con Firewall.",
+          "Navega tranquilo: Datos seguros."
+        ]
+      },
+      {
+        "title": "💼 ¿Viaje de Negocios?",
+        "text": [
+          "Salas de conferencias privadas.",
+          "📅 Consulta disponibilidad."
+        ]
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: FAQ_CHECKIN_CHECKOUT</span>
+                <span class="tag">Recepción</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Frases de Entrenamiento</h4>
+                    <ul class="phrases">
+                        <li>¿A qué hora es la entrada?</li>
+                        <li>¿Hasta qué hora puedo dejar la habitación?</li>
+                        <li>¿Puedo entrar antes de tiempo?</li>
+                        <li>Horario de salida</li>
+                        <li>¿Puedo entrar un poco antes?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Visual</h4>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "title": "🕒 Horarios de Estancia",
+        "text": [
+          "📥 Entrada: A partir de 14:00h",
+          "📤 Salida: Antes de 12:00h"
+        ]
+      },
+      {
+        "title": "🧳 ¿Llegas antes/sales tarde?",
+        "text": [
+          "Guarda maletas GRATIS en consigna.",
+          "Consulta disponibilidad Early Check-in."
+        ]
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: FAQ_MASCOTAS</span>
+                <span class="tag">Políticas</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Frases de Entrenamiento</h4>
+                    <ul class="phrases">
+                        <li>¿Admiten mascotas?</li>
+                        <li>¿El hotel es pet friendly?</li>
+                        <li>¿Puedo llevar a mi perro/gato?</li>
+                        <li>¿Hay suplemento por mascota?</li>
+                        <li>¿Puedo dejar a mi mascota sola?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Visual</h4>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "title": "🐾 ¡Sí, somos Pet Friendly!",
+        "text": [
+          "💶 Suplemento: 8€/día.",
+          "🐕 Límite: Máx 2 mascotas.",
+          "🚫 Normas: No pueden quedarse solos."
+        ]
+      },
+      {
+        "title": "🏢 ¿Necesitas salir sin ellos?",
+        "text": [
+          "Contacto con guardería de confianza.",
+          "💰 Precio: 10€/día."
+        ]
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card" style="border-left: 5px solid #004e92;">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: INFO_HABITACION</span>
+                <span class="tag" style="background:#004e92">Entidades + Parámetros</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Entidad: @Tipo_Habitacion</h4>
+                    <p style="font-size:0.85rem; color:#666; font-style:italic;">Detecta sinónimos automáticos:</p>
+                    <ul class="phrases">
+                        <li><strong>Estándar:</strong> doble, sencilla, económica...</li>
+                        <li><strong>Familiar:</strong> niños, grupo, triple...</li>
+                        <li><strong>Suite:</strong> lujo, vip, jacuzzi...</li>
+                    </ul>
+                    <hr style="border:0; border-top:1px dashed #ccc">
+                    <h4>Frases de usuario</h4>
+                    <ul class="phrases">
+                        <li>¿Qué precio tiene la <strong>estándar</strong>?</li>
+                        <li>Busco algo de <strong>lujo</strong></li>
+                        <li>¿Tenéis habitaciones para <strong>niños</strong>?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Dinámica + Visual</h4>
+                    <p style="font-family:monospace; font-size:0.8rem; color:#004e92">"La habitación $Tipo_Habitacion es muy solicitada..."</p>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "title": "🛏️ Estándar",
+        "text": ["💰 Desde 80€/noche.", "👥 1-2 personas."]
+      },
+      {
+        "title": "👨‍👩‍👧‍👦 Familiar",
+        "text": ["💰 Desde 140€/noche.", "👥 Hasta 4 pax."]
+      },
+      {
+        "type": "button",
+        "text": "📸 VER FOTOS (Ir a la web)",
+        "link": "#habitaciones"
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card" style="border-left: 5px solid #004e92;">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: RECOMENDACIONES_LOCALES</span>
+                <span class="tag" style="background:#004e92">Geolocalización / Guía</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Entidad: @Tipo_Plan</h4>
+                    <ul class="phrases">
+                        <li><strong>Gastronomía:</strong> comer, tapas, cenar...</li>
+                        <li><strong>Turismo:</strong> visitar, paseo, playa...</li>
+                        <li><strong>Fiesta:</strong> copas, pub, salir...</li>
+                    </ul>
+                    <hr style="border:0; border-top:1px dashed #ccc">
+                    <h4>Frases de usuario</h4>
+                    <ul class="phrases">
+                        <li>¿Dónde puedo <strong>cenar</strong> cerca?</li>
+                        <li>Quiero <strong>salir de fiesta</strong></li>
+                        <li>¿Qué <strong>museos</strong> recomiendan?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta Interactiva (Chips)</h4>
+                     <p style="font-family:monospace; font-size:0.8rem; color:#004e92">"¡Aquí tienes las mejores opciones locales para $Tipo_Plan! 🗺️ He seleccionado mis favoritas:"</p>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "title": "🥘 Gastronomía",
+        "text": ["🐟 La Taberna del Puerto", "🥗 VerdeVivo"]
+      },
+      {
+        "title": "🏰 Turismo",
+        "text": ["📸 El Castillo", "🏖️ Cala Blanca"]
+      },
+      {
+        "type": "chips",
+        "options": [
+          { "text": "Reservar Mesa 🍽️" },
+          { "text": "Pedir Taxi 🚕" }
+        ]
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intent-card" style="border-left: 5px solid #d32f2f;">
+            <div class="intent-header">
+                <span class="intent-name">INTENT: CONTACTAR_RECEPCION</span>
+                <span class="tag" style="background:#d32f2f">Escalado a Agente</span>
+            </div>
+            <div class="intent-body">
+                <div>
+                    <h4>Frases de Entrenamiento</h4>
+                    <ul class="phrases">
+                        <li>Quiero hablar con un humano</li>
+                        <li>Pásame con recepción</li>
+                        <li>No quiero hablar con máquinas</li>
+                        <li>¿Hay alguien ahí?</li>
+                    </ul>
+                </div>
+                <div>
+                    <h4>Respuesta de Acción (Llamada)</h4>
+                    <div class="json-block">
+{
+  "richContent": [
+    [
+      {
+        "title": "👨‍💻 Contactando...",
+        "text": ["Transfiriendo a agente humano."]
+      },
+      {
+        "title": "🆘 ¿Es una urgencia?",
+        "text": ["📞 +34 900 000 000"]
+      },
+      {
+        "type": "button",
+        "icon": { "type": "phone", "color": "#d32f2f" },
+        "text": "Llamar ahora",
+        "link": "tel:+34900000000"
+      }
+    ]
+  ]
+}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>Documentación generada automáticamente para la práctica del curso.</p>
+        <p>2026 © Dialogflow Integration Project</p>
+    </footer>
+
+</body>
+</html>
